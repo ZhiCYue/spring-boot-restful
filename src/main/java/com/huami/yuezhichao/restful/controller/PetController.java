@@ -21,9 +21,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-@Api(description = "用户接口")
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
+
+@Api(description = "PetStore接口")
 @RestController
-@RequestMapping(value = "/v2")
+@RequestMapping(value = "/v2", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
 public class PetController {
 
     /**
@@ -44,6 +47,7 @@ public class PetController {
 //        if(!StringUtils.isEmpty(body)){
 //            System.out.println("receive body :"+body);
 //        }
+
 //        String contentType = request.getHeader("Content-Type");
 //        Pet pet = null;
 //        if("application/json".equals(contentType)){
@@ -51,12 +55,24 @@ public class PetController {
 //        } else if("application/xml".equals(contentType)){
 //            pet = JacksonUtils.json2pojo(JacksonUtils.xml2json(body), Pet.class);
 //        }
-        System.out.println("receive: " + JacksonUtils.obj2json(pet));
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/xml;charset=UTF-8");
 
-        return new ResponseEntity<>("Invalid input", headers, HttpStatus.NOT_FOUND);
+        System.out.println("receive: " + JacksonUtils.obj2json(pet));
+        pet.setId(123);
+
+        ResponseEntity resp = new ResponseEntity<>("success", headers, HttpStatus.OK);
+
+        String contentType = request.getHeader("Content-Type");
+        if ("application/json".equals(contentType)) {
+            headers.set("Content-Type", "application/json;charset=UTF-8");
+            resp = new ResponseEntity<>(JacksonUtils.obj2json(pet), headers, HttpStatus.OK);
+        } else if ("application/xml".equals(contentType)) {
+            headers.set("Content-Type", "application/xml;charset=UTF-8");
+            resp = new ResponseEntity<>(JacksonUtils.bean2Xml(pet), headers, HttpStatus.OK);
+        }
+
+        return resp;
     }
 
     /**
@@ -73,6 +89,9 @@ public class PetController {
         BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
         String body = IOUtils.read(reader);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/xml;charset=UTF-8");
+
         if(!StringUtils.isEmpty(body)){
             System.out.println("receive body :"+body);
         }
@@ -80,12 +99,12 @@ public class PetController {
         Pet pet = null;
         if("application/json".equals(contentType)){
             pet = JacksonUtils.json2pojo(body, Pet.class);
+            return new ResponseEntity<>(JacksonUtils.obj2json(pet), headers, HttpStatus.OK);
         } else if("application/xml".equals(contentType)){
             pet = JacksonUtils.json2pojo(JacksonUtils.xml2json(body), Pet.class);
+            return new ResponseEntity<>("OK", headers, HttpStatus.OK);
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/xml;charset=UTF-8");
 
         System.out.println("receive: " + pet);
         if(pet.getId() == null) {
@@ -203,7 +222,7 @@ public class PetController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json;charset=UTF-8");
 
-        return new ResponseEntity<>("Invalid input", null, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(petId, null, HttpStatus.OK);
     }
 
 }

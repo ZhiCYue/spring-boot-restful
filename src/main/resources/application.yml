@@ -1,0 +1,5 @@
+
+# 白名单
+whiteList:
+    ip: 198.13.41.71
+    referer: restful.lvdoufun.com,api.lvdoufun.com,http://127.0.0.1:8080/

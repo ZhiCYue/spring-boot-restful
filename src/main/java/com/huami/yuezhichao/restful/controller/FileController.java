@@ -18,6 +18,7 @@ import java.io.IOException;
 @RequestMapping(value = "/file")
 public class FileController {
 
+
     @RequestMapping(value = "/index")
     public String index(HttpSession session, ModelMap model) {
         model.addAttribute("name", "Jay");
@@ -38,9 +39,6 @@ public class FileController {
             }
         }
         System.out.println("name:" + request.getParameter("name"));
-
-
-        response.setHeader("Access-Control-Allow-Origin", "*");
 
         return "url";
     }
